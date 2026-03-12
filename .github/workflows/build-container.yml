@@ -71,7 +71,7 @@ jobs:
       - name: Compute image tags
         id: tags
         run: |
-          IMAGE="${{ env.IMAGE_PREFIX }}/${{ matrix.tool }}"
+          IMAGE=$(echo "${{ env.IMAGE_PREFIX }}/${{ matrix.tool }}" | tr '[:upper:]' '[:lower:]')
           VERSION="${{ matrix.version }}"
           MAJOR="${VERSION%%.*}"
           MINOR="${VERSION%.*}"
