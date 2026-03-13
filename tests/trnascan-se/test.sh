@@ -19,10 +19,22 @@ fail() { ((++FAIL)); echo "  ❌  $1"; }
 echo "── Testing ${IMAGE} (expected v${EXPECTED_VERSION}) ──"
 
 # -------------------------------------------------------------------
-# 1. Help flag exits cleanly
+# 1. Version check (extracted from -h output)
 # -------------------------------------------------------------------
 echo ""
-echo "1) Help flag"
+echo "1) Version check"
+if OUTPUT=$(docker run --rm --entrypoint tRNAscan-SE "${IMAGE}" -h 2>&1) && \
+   echo "${OUTPUT}" | grep -qiE "tRNAscan-SE ${EXPECTED_VERSION}"; then
+  pass "Version string contains ${EXPECTED_VERSION}"
+else
+  fail "Version string missing (output: ${OUTPUT:0:200})"
+fi
+
+# -------------------------------------------------------------------
+# 2. Help flag exits cleanly
+# -------------------------------------------------------------------
+echo ""
+echo "2) Help flag"
 if docker run --rm --entrypoint tRNAscan-SE "${IMAGE}" -h >/dev/null 2>&1; then
   pass "Exit code 0 with -h"
 else
@@ -30,10 +42,10 @@ else
 fi
 
 # -------------------------------------------------------------------
-# 2. Perl runtime works (libcrypt.so.1 regression check)
+# 3. Perl runtime works (libcrypt.so.1 regression check)
 # -------------------------------------------------------------------
 echo ""
-echo "2) Perl runtime sanity"
+echo "3) Perl runtime sanity"
 if OUTPUT=$(docker run --rm --entrypoint perl "${IMAGE}" -e 'print "ok\n"' 2>&1) && \
    echo "${OUTPUT}" | grep -q "ok"; then
   pass "Perl executes successfully"
@@ -42,11 +54,11 @@ else
 fi
 
 # -------------------------------------------------------------------
-# 3. Functional: scan a minimal FASTA for tRNAs
+# 4. Functional: scan a minimal FASTA for tRNAs
 #    E. coli tRNA-fMet (well-characterised, should always be found).
 # -------------------------------------------------------------------
 echo ""
-echo "3) Functional: detect tRNA in sample FASTA"
+echo "4) Functional: detect tRNA in sample FASTA"
 FASTA=">ecoli_tRNA_fMet
 CGCGGGGTGGAGCAGCCTGGTAGCTCGTCGGGCTCATAACCCGAAGGTCG
 TCGGTTCAAATCCGGCCCCCGCAACCA"
@@ -66,10 +78,10 @@ fi
 rm -rf "${TMPDIR}"
 
 # -------------------------------------------------------------------
-# 4. Shared libraries resolve at runtime
+# 5. Shared libraries resolve at runtime
 # -------------------------------------------------------------------
 echo ""
-echo "4) Runtime library check"
+echo "5) Runtime library check"
 if OUTPUT=$(docker run --rm --entrypoint perl "${IMAGE}" -e 'use POSIX; print "ok\n"' 2>&1) && \
    echo "${OUTPUT}" | grep -q "ok"; then
   pass "Perl loads POSIX module (shared libs OK)"
