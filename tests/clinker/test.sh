@@ -117,7 +117,7 @@ chmod 755 "${TMPDIR}"
 chmod 644 "${TMPDIR}"/*.gbk
 
 if OUTPUT=$(docker run --rm -v "${TMPDIR}:/data" "${IMAGE}" \
-    /data/test1.gbk /data/test2.gbk --no_browser 2>&1); then
+    /data/test1.gbk /data/test2.gbk 2>&1); then
   pass "clinker ran successfully on GenBank files"
 else
   fail "clinker failed on GenBank files (exit $?, output: ${OUTPUT:0:300})"
