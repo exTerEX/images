@@ -13,14 +13,19 @@ Docker/OCI images for the following command‑line utilities:
 | Tool | Description | Versions |
 |------|-------------|----------|
 | **aragorn** | tRNA and tmRNA detection | 1.2.36, 1.2.38, 1.2.41 |
+| **barrnap** | Bacterial ribosomal RNA predictor (built from source via `environment.yml`) | 1.0.0 |
 | **tRNAscan‑SE** | Transfer RNA gene prediction | 2.0.0, 2.0.3, 2.0.5 – 2.0.12 |
 | **clinker** | Gene cluster comparison and visualisation (`clinker-py`) | 0.0.12, 0.0.19 – 0.0.32 |
 | **cblaster** | Remote homologue detection and gene cluster search (ships with `cagecleaner`) | 1.3.9, 1.3.11 – 1.3.20, 1.4.0 |
+| **defense‑finder** | Systematic search for anti‑phage defense systems | 1.0.9, 1.1.1, 1.2.0 – 1.2.2, 1.3.0, 2.0.0, 2.0.1 |
+| **rgi** | Resistance Gene Identifier (CARD) | 5.0.0, 5.1.0 – 5.2.1, 6.0.0 – 6.0.7 |
 
-All tools are installed from the [Bioconda](https://bioconda.github.io/)
-package channel using **micromamba** running on an Alpine base image. The
-resulting containers are small and suitable for use in pipelines,
-Kubernetes jobs, or as base images for other workflows.
+Most tools are installed from the [Bioconda](https://bioconda.github.io/)
+package channel using **micromamba** running on an Alpine base image.
+**barrnap** is built from its Git repository using the bundled
+`environment.yml` to install dependencies. The resulting containers are
+small and suitable for use in pipelines, Kubernetes jobs, or as base
+images for other workflows.
 
 ## Repository layout
 
@@ -30,6 +35,8 @@ Kubernetes jobs, or as base images for other workflows.
 │  ├─ 1.2.36/Dockerfile
 │  ├─ 1.2.38/Dockerfile
 │  └─ 1.2.41/Dockerfile
+├─ barrnap/
+│  └─ 1.0.0/Dockerfile
 ├─ trnascan-se/
 │  ├─ 2.0.0/Dockerfile
 │  ├─ 2.0.3/Dockerfile
@@ -42,11 +49,22 @@ Kubernetes jobs, or as base images for other workflows.
 │  ├─ 1.3.9/Dockerfile
 │  ├─ 1.3.11/Dockerfile
 │  └─ ...
+├─ defense-finder/
+│  ├─ 1.0.9/Dockerfile
+│  ├─ 2.0.1/Dockerfile
+│  └─ ...
+├─ rgi/
+│  ├─ 5.0.0/Dockerfile
+│  ├─ 6.0.7/Dockerfile
+│  └─ ...
 ├─ tests/
 │  ├─ aragorn/test.sh
+│  ├─ barrnap/test.sh
 │  ├─ trnascan-se/test.sh
 │  ├─ clinker/test.sh
-│  └─ cblaster/test.sh
+│  ├─ cblaster/test.sh
+│  ├─ defense-finder/test.sh
+│  └─ rgi/test.sh
 ├─ shared/
 ├─ .github/
 │  ├─ workflows/build-container.yml        # CI workflow
@@ -64,9 +82,12 @@ Dockerfiles, then updating the `ARG` value.
 You can build an image manually with `docker build` or `podman`:
 
 ```sh
-docker build -t aragorn:1.2.41   ./aragorn/1.2.41
-docker build -t clinker:0.0.32   ./clinker/0.0.32
-docker build -t cblaster:1.4.0   ./cblaster/1.4.0
+docker build -t aragorn:1.2.41          ./aragorn/1.2.41
+docker build -t barrnap:1.0.0           ./barrnap/1.0.0
+docker build -t clinker:0.0.32          ./clinker/0.0.32
+docker build -t cblaster:1.4.0          ./cblaster/1.4.0
+docker build -t defense-finder:2.0.1    ./defense-finder/2.0.1
+docker build -t rgi:6.0.7               ./rgi/6.0.7
 ```
 
 Replace the tool name and version string as needed.
@@ -101,28 +122,9 @@ test script, or shared file. The logic is as follows:
 The workflow also supports manual invocation via `workflow_dispatch`, which
 rebuilds and tests every image.
 
-### Tagging scheme
-
-For each version built the following tags are pushed:
-
-* `tool:X.Y.Z` – exact version
-* `tool:X.Y` – latest minor release (only for the highest version in that
-  minor series)
-* `tool:X` – latest major release (only for the highest version overall)
-* `tool:latest` – alias for the current major release
-
-For example, building `aragorn/1.2.41` produces:
-```
-ghcr.io/.../aragorn:1.2.41
-ghcr.io/.../aragorn:1.2
-ghcr.io/.../aragorn:1
-ghcr.io/.../aragorn:latest
-```
-
 ## Dependency updates
 
-A `dependabot.yml` configuration keeps the GitHub Actions and the base
-`mambaorg/micromamba` images up to date. Pull requests are opened weekly
+A `dependabot.yml` configuration keeps the GitHub Actions and the base images up to date. Pull requests are opened weekly
 whenever new versions are available; they are labeled `dependencies` and
 either `github-actions` or `docker`.
 
@@ -142,4 +144,4 @@ The container definitions are provided under the [MIT License](LICENSE).
 
 ---
 
-_Maintained by exTerEX – built with GitHub Actions and micromamba._
+_Maintained by exTerEX_
