@@ -59,8 +59,8 @@ jobs:
           # ── Helper: highest version for a given tool ───────────
           latest_version() {
             local tool="$1"
-            ls -d "${tool}"/*/ 2>/dev/null | \
-              xargs -I{} basename {} | sort -V | tail -1
+            find "$tool" -maxdepth 1 -mindepth 1 -type d 2>/dev/null \
+              -printf '%f\n' | sort -V | tail -1 || true
           }
 
           # ── Collect pairs to build ─────────────────────────────
