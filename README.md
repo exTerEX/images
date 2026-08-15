@@ -127,4 +127,4 @@ The container definitions are provided under the [MIT License](LICENSE).
 
 ---
 
-_Maintained by exTerEX_
+_Maintained by andreassag_
